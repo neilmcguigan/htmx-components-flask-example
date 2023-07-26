@@ -1,0 +1,9 @@
+{% if "HX-Request" not in request.headers %}
+{% extends "base.html" %}
+{% endif %}
+
+{% block content %}
+
+{% include "htmx_components_flask/form/horizontal.html" %}
+
+{% endblock %}

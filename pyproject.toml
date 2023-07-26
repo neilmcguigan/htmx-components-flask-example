@@ -1,0 +1,19 @@
+[project]
+name = "htmx-components-flask-example"
+authors = [
+    {name = "Neil McGuigan"},
+]
+version = "0.0.1"
+description = "An example Flask application using HTMX Components Flask"
+readme = "README.md"
+classifiers = []
+dependencies = [
+    "flask==2.3.2","flask-sqlalchemy==3.0.5","flask-wtf[email]==1.1.1"
+]
+
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules=[]
