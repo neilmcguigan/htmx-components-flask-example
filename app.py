@@ -5,7 +5,7 @@ from functools import partial
 from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from htmx_components_flask import htmx_components_flask
-from htmx_components_python import GridConfig
+from htmx_components_python import GridConfig, TreeConfig
 from jinja2 import StrictUndefined
 from sqlalchemy import Table, asc, desc, func, select, text
 
@@ -35,7 +35,7 @@ def index():
     return render_template("index.html")
 
 
-@app.route("/viewgrid", methods=["GET", "POST"])
+@app.route("/gridview", methods=["GET", "POST"])
 def viewgrid():
     grid1 = GridConfig(
         columns=[
@@ -48,7 +48,7 @@ def viewgrid():
     )
 
     grid1.get_records = partial(get_records, customers_table)
-    return render_template("viewgrid.html", grid_config=grid1)
+    return render_template("gridview.html", grid_config=grid1)
 
 
 @app.route("/form", methods=["GET", "POST"])
@@ -56,6 +56,47 @@ def form():
     form = KitchenSink(request.form)
     form.validate_on_submit()
     return render_template("form.html", form=form)
+
+
+@app.route("/treeview", methods=["GET", "POST"])
+def tree():
+    tree = TreeConfig(
+        data=get_georegions_eager,
+    )
+    return render_template("treeview.html", tree=tree)
+
+
+def get_georegions_eager(q: str | None = None):
+    query = """
+with recursive exp1 as (
+    select
+        id,
+        name,
+        parent_id
+    from georegions
+    where
+        name like :q
+
+    union
+
+    select
+        parent.id,
+        parent.name,
+        parent.parent_id
+    from georegions as parent
+        inner join exp1 as child on child.parent_id = parent.id
+    order by
+        name asc
+)
+select * from exp1
+"""
+
+    cursor_result = db.session.execute(text(query), {"q": f"%{q}%"})
+
+    result = []
+    for row in cursor_result:
+        result.append(row._mapping)
+    return result
 
 
 def get_records(
